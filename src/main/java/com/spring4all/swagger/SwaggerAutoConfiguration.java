@@ -2,6 +2,7 @@ package com.spring4all.swagger;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.spring4all.swagger.model.DocketInfo;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -70,6 +71,16 @@ public class SwaggerAutoConfiguration implements BeanFactoryAware {
     @ConditionalOnMissingBean
     @ConditionalOnBean(UiConfiguration.class)
     @ConditionalOnProperty(name = "swagger.enabled", matchIfMissing = true)
+    public List<Docket> createRestApiV2(SwaggerProperties swaggerProperties) {
+        // Refactor: 重构一组合理的Docket
+        SwaggerPropertiesParser parser = new SwaggerPropertiesParser(swaggerProperties);
+        return parser.getDocketList().stream().peek(this::registerBean).collect(Collectors.toList());
+    }
+
+//    @Bean
+//    @ConditionalOnMissingBean
+//    @ConditionalOnBean(UiConfiguration.class)
+//    @ConditionalOnProperty(name = "swagger.enabled", matchIfMissing = true)
     public List<Docket> createRestApi(SwaggerProperties swaggerProperties) {
         ConfigurableBeanFactory configurableBeanFactory = (ConfigurableBeanFactory) beanFactory;
         List<Docket> docketList = new LinkedList<>();
@@ -82,7 +93,7 @@ public class SwaggerAutoConfiguration implements BeanFactoryAware {
                     .version(swaggerProperties.getVersion())
                     .license(swaggerProperties.getLicense())
                     .licenseUrl(swaggerProperties.getLicenseUrl())
-                    .contact(new Contact(swaggerProperties.getContact().getName(),
+                    .contact(new springfox.documentation.service.Contact(swaggerProperties.getContact().getName(),
                             swaggerProperties.getContact().getUrl(),
                             swaggerProperties.getContact().getEmail()))
                     .termsOfServiceUrl(swaggerProperties.getTermsOfServiceUrl())
@@ -143,7 +154,7 @@ public class SwaggerAutoConfiguration implements BeanFactoryAware {
 
         // 分组创建
         for (String groupName : swaggerProperties.getDocket().keySet()) {
-            SwaggerProperties.DocketInfo docketInfo = swaggerProperties.getDocket().get(groupName);
+            DocketInfo docketInfo = swaggerProperties.getDocket().get(groupName);
 
             ApiInfo apiInfo = new ApiInfoBuilder()
                     .title(docketInfo.getTitle().isEmpty() ? swaggerProperties.getTitle() : docketInfo.getTitle())
@@ -152,7 +163,7 @@ public class SwaggerAutoConfiguration implements BeanFactoryAware {
                     .license(docketInfo.getLicense().isEmpty() ? swaggerProperties.getLicense() : docketInfo.getLicense())
                     .licenseUrl(docketInfo.getLicenseUrl().isEmpty() ? swaggerProperties.getLicenseUrl() : docketInfo.getLicenseUrl())
                     .contact(
-                            new Contact(
+                            new springfox.documentation.service.Contact(
                                     docketInfo.getContact().getName().isEmpty() ? swaggerProperties.getContact().getName() : docketInfo.getContact().getName(),
                                     docketInfo.getContact().getUrl().isEmpty() ? swaggerProperties.getContact().getUrl() : docketInfo.getContact().getUrl(),
                                     docketInfo.getContact().getEmail().isEmpty() ? swaggerProperties.getContact().getEmail() : docketInfo.getContact().getEmail()
@@ -217,6 +228,11 @@ public class SwaggerAutoConfiguration implements BeanFactoryAware {
         return docketList;
     }
 
+    private void registerBean(Docket docket) {
+        String beanName = String.format("%sDocket", docket.getGroupName());
+        ((ConfigurableBeanFactory)beanFactory).registerSingleton(beanName, docket);
+    }
+
     /**
      * 配置基于 ApiKey 的鉴权对象
      *
@@ -272,13 +288,13 @@ public class SwaggerAutoConfiguration implements BeanFactoryAware {
 
 
     private List<Parameter> buildGlobalOperationParametersFromSwaggerProperties(
-            List<SwaggerProperties.GlobalOperationParameter> globalOperationParameters) {
+            List<GlobalOperationParameter> globalOperationParameters) {
         List<Parameter> parameters = newArrayList();
 
         if (Objects.isNull(globalOperationParameters)) {
             return parameters;
         }
-        for (SwaggerProperties.GlobalOperationParameter globalOperationParameter : globalOperationParameters) {
+        for (GlobalOperationParameter globalOperationParameter : globalOperationParameters) {
             parameters.add(new ParameterBuilder()
                     .name(globalOperationParameter.getName())
                     .description(globalOperationParameter.getDescription())
@@ -298,21 +314,21 @@ public class SwaggerAutoConfiguration implements BeanFactoryAware {
      * @return
      */
     private List<Parameter> assemblyGlobalOperationParameters(
-            List<SwaggerProperties.GlobalOperationParameter> globalOperationParameters,
-            List<SwaggerProperties.GlobalOperationParameter> docketOperationParameters) {
+            List<GlobalOperationParameter> globalOperationParameters,
+            List<GlobalOperationParameter> docketOperationParameters) {
 
         if (Objects.isNull(docketOperationParameters) || docketOperationParameters.isEmpty()) {
             return buildGlobalOperationParametersFromSwaggerProperties(globalOperationParameters);
         }
 
         Set<String> docketNames = docketOperationParameters.stream()
-                .map(SwaggerProperties.GlobalOperationParameter::getName)
+                .map(GlobalOperationParameter::getName)
                 .collect(Collectors.toSet());
 
-        List<SwaggerProperties.GlobalOperationParameter> resultOperationParameters = newArrayList();
+        List<GlobalOperationParameter> resultOperationParameters = newArrayList();
 
         if (Objects.nonNull(globalOperationParameters)) {
-            for (SwaggerProperties.GlobalOperationParameter parameter : globalOperationParameters) {
+            for (GlobalOperationParameter parameter : globalOperationParameters) {
                 if (!docketNames.contains(parameter.getName())) {
                     resultOperationParameters.add(parameter);
                 }
@@ -331,7 +347,7 @@ public class SwaggerAutoConfiguration implements BeanFactoryAware {
      */
     private void buildGlobalResponseMessage(SwaggerProperties swaggerProperties, Docket docketForBuilder) {
 
-        SwaggerProperties.GlobalResponseMessage globalResponseMessages =
+        GlobalResponseMessage globalResponseMessages =
                 swaggerProperties.getGlobalResponseMessage();
 
         /* POST,GET,PUT,PATCH,DELETE,HEAD,OPTIONS,TRACE 响应消息体 **/
@@ -362,9 +378,9 @@ public class SwaggerAutoConfiguration implements BeanFactoryAware {
      * @return
      */
     private List<ResponseMessage> getResponseMessageList
-    (List<SwaggerProperties.GlobalResponseMessageBody> globalResponseMessageBodyList) {
+    (List<GlobalResponseMessageBody> globalResponseMessageBodyList) {
         List<ResponseMessage> responseMessages = new ArrayList<>();
-        for (SwaggerProperties.GlobalResponseMessageBody globalResponseMessageBody : globalResponseMessageBodyList) {
+        for (GlobalResponseMessageBody globalResponseMessageBody : globalResponseMessageBodyList) {
             ResponseMessageBuilder responseMessageBuilder = new ResponseMessageBuilder();
             responseMessageBuilder.code(globalResponseMessageBody.getCode()).message(globalResponseMessageBody.getMessage());
 

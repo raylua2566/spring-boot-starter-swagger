@@ -6,7 +6,7 @@
 
     <groupId>com.spring4all</groupId>
     <artifactId>swagger-spring-boot-starter</artifactId>
-    <version>1.9.0.RELEASE</version>
+    <version>1.9.x</version>
 
     <name>spring-boot-starter-swagger</name>
     <url>https://github.com/SpringForAll/spring-boot-starter-swagger</url>
@@ -42,6 +42,11 @@
             <name>小火</name>
             <email>xiaohuo200@gmail.com</email>
             <organization>https://renlulu.github.io/</organization>
+        </developer>
+        <developer>
+            <name>RayLau</name>
+            <email>raylua2566@hotmail.com</email>
+            <organization>https://www.xingfa.com/</organization>
         </developer>
     </developers>
 
@@ -116,6 +121,19 @@
                     <target>${version.java}</target>
                     <showWarnings>true</showWarnings>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
