@@ -1,6 +1,5 @@
 package com.spring4all.swagger.model;
 
-import com.spring4all.swagger.GlobalOperationParameter;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;

@@ -1,8 +1,6 @@
 package com.spring4all.swagger;
 
-import com.spring4all.swagger.model.Authorization;
-import com.spring4all.swagger.model.Contact;
-import com.spring4all.swagger.model.DocketInfo;
+import com.spring4all.swagger.model.*;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

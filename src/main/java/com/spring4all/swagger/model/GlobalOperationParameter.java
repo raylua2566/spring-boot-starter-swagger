@@ -1,4 +1,4 @@
-package com.spring4all.swagger;
+package com.spring4all.swagger.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
