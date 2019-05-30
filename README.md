@@ -47,6 +47,48 @@ public class Bootstrap {
 
 默认情况下就能产生所有当前Spring MVC加载的请求映射文档。
 
+# 跟踪日志
+
+```yml
+logging:
+  level:
+    # 设置成debug级别, 查看spring
+    com.spring4all.swagger: debug
+```
+
+输出结果:
+
+```text
+xxxx-xx-xx 09:31:45.950 DEBUG 78259 --- [           main] c.s.swagger.SwaggerPropertiesParser      : 
+---------------- 初始化Swagger DockerInfos(2)-----------------
+group1:
+    {
+      "title" : "Group-1",
+      "description" : "分组1描述",
+      "version" : "1.0.0-SNAPSHOT",
+      "license" : "license-demo",
+      "licenseUrl" : "licenseUrl-demo",
+      "termsOfServiceUrl" : "termsOfServiceUrl-demo",
+      "host" : "localhost:8080",
+      "contact" : {
+        "name" : "",
+        "url" : "",
+        "email" : ""
+      },
+      "basePackage" : "com.xingfa.lession2.group1",
+      "basePath" : [ "/**" ],
+      "excludePath" : [ "/error" ],
+      "globalOperationParameters" : [ {
+        "name" : "systemId",
+        "description" : "全局参数: 帐套ID",
+        "modelRef" : "string",
+        "parameterType" : "header",
+        "required" : "true"
+      } ],
+      "ignoredParameterTypes" : [ ]
+    }
+```
+
 # 参数配置
 
 更细致的配置内容参考如下：
